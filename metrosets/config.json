@@ -19,22 +19,43 @@
         "studyEndMsg": "Thank you for completing the study.",        
         "withProgressBar": true,
         "autoDownloadStudy": false,
-        "sidebar": false  
+        "withSidebar": false  
     },
     "baseComponents": {
     },
     "components": {
-        "question1": {
+    "magic": {
         "type": "website",
-        "path": "https://beta.metrosets.algo.cit.tum.de/app.html?dataset=magic",
+        "path": "http://127.0.0.1:8080/app.html?dataset=magic_exploration.json",
         "response": [
         ]
-        }
+        },
+    "study": {
+        "type": "website",
+        "path": "http://127.0.0.1:8080/app.html?dataset=study_curriculum_data.json",
+        "response": [
+        ]
+    },
+    "cocktails": {
+        "type": "website",
+        "path": "http://127.0.0.1:8080/app.html?dataset=cocktails_data.json",
+        "response": [
+        ]
+    },
+    "imdb": {
+        "type": "website",
+        "path": "http://127.0.0.1:8080/app.html?dataset=imdb_small_data.json",
+        "response": [
+        ]
+    }
     },
     "sequence": {
         "order": "fixed",
         "components": [
-            "question1"
+            "magic",
+            "study",
+            "cocktails",
+            "imdb"
         ]
     }
 }

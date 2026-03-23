@@ -1,7 +1,6 @@
 import {
   forwardRef, RefObject, useCallback, useEffect, useMemo, useRef, useState,
 } from 'react';
-import { Box } from '@mantine/core';
 import { APITypes, PlyrProps, usePlyr } from 'plyr-react';
 import { VideoComponent } from '../parser/types';
 import { PREFIX } from '../utils/Prefix';
@@ -10,26 +9,84 @@ import { ResourceNotFound } from '../ResourceNotFound';
 import 'plyr-react/plyr.css';
 import { useStoreActions, useStoreDispatch } from '../store/store';
 import { useCurrentComponent, useCurrentStep } from '../routes/utils';
+// eslint-disable-next-line import/order
+import { Box, LoadingOverlay } from '@mantine/core';
+
+type VideoProvider = 'youtube' | 'vimeo' | 'html5';
+
+function getVideoProvider(url: string): VideoProvider {
+  if (url.includes('youtube') || url.includes('youtu.be')) {
+    return 'youtube';
+  }
+  if (url.includes('vimeo')) {
+    return 'vimeo';
+  }
+  return 'html5';
+}
+
+function isValidYouTubeUrl(url: string): boolean {
+  // Basic check for YouTube video ID in URL
+  const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}/;
+  return youtubeRegex.test(url);
+}
+
+function isValidVimeoUrl(url: string): boolean {
+  // Basic check for Vimeo video ID in URL
+  const vimeoRegex = /^(https?:\/\/)?(www\.)?vimeo\.com\/\d+/;
+  return vimeoRegex.test(url);
+}
 
 // eslint-disable-next-line react/display-name
-const CustomPlyrInstance = forwardRef<APITypes, PlyrProps & { endedCallback:() => void; errorCallback: () => void }>(
+const CustomPlyrInstance = forwardRef<APITypes, PlyrProps & { endedCallback:() => void; }>(
   (props, ref) => {
     const {
-      source, options = null, endedCallback, errorCallback,
+      source, options = null, endedCallback,
     } = props;
     const raptorRef = usePlyr(ref, { options, source });
 
     useEffect(() => {
-      const { current } = ref as RefObject<APITypes>;
-      if (current.plyr.source === null) return;
-      current.plyr.on('ended', endedCallback);
-      current.plyr.on('error', errorCallback);
-    });
+      let animationFrameId: number | undefined;
+      let cleanup = () => {};
+
+      const registerEndedHandler = () => {
+        const plyr = (ref as RefObject<APITypes>).current?.plyr;
+        if (!plyr || typeof plyr.on !== 'function' || typeof plyr.off !== 'function') {
+          animationFrameId = window.requestAnimationFrame(registerEndedHandler);
+          return;
+        }
+
+        try {
+          // Make registration idempotent across StrictMode mount/unmount cycles.
+          plyr.off('ended', endedCallback);
+          plyr.on('ended', endedCallback);
+          cleanup = () => {
+            try {
+              plyr.off('ended', endedCallback);
+            } catch {
+              // Plyr instance can already be disposed during teardown.
+            }
+          };
+        } catch {
+          cleanup = () => {};
+        }
+      };
+
+      registerEndedHandler();
+
+      return () => {
+        if (animationFrameId !== undefined) {
+          window.cancelAnimationFrame(animationFrameId);
+        }
+        cleanup();
+      };
+    }, [endedCallback, ref, source]);
 
     return (
       <video
         ref={raptorRef}
         className="plyr-react plyr"
+        // Ensure HTML5 videos still trigger completion even if Plyr event wiring fails.
+        onEnded={endedCallback}
       />
     );
   });
@@ -41,28 +98,56 @@ export function VideoController({ currentConfig }: { currentConfig: VideoCompone
     }
     return `${PREFIX}${currentConfig.path}`;
   }, [currentConfig.path]);
+  const provider = useMemo(() => getVideoProvider(url), [url]);
+  const validExternalUrl = useMemo(() => {
+    if (provider === 'youtube') {
+      return isValidYouTubeUrl(url);
+    }
+    if (provider === 'vimeo') {
+      return isValidVimeoUrl(url);
+    }
+    return true;
+  }, [provider, url]);
 
   const [loading, setLoading] = useState(true);
   const [assetFound, setAssetFound] = useState(false);
+
   useEffect(() => {
+    let isCancelled = false;
+
     async function fetchVideo() {
-      if (url.startsWith('http')) {
-        // It is impossible to check whether a video exists on a remote server because of CORS
-        // We just assume it exists and if it doesn't, the player will throw an error
-        // We use that error callback to set assetFound to false and show not found component
-        setAssetFound(true);
-      } else {
+      setLoading(true);
+      try {
+        if (provider !== 'html5') {
+          if (!isCancelled) {
+            setAssetFound(validExternalUrl);
+            setLoading(false);
+          }
+          return;
+        }
+
         const asset = await getStaticAssetByPath(url);
-        setAssetFound(!!asset);
+        if (!isCancelled) {
+          setAssetFound(!!asset);
+          setLoading(false);
+        }
+      } catch {
+        if (!isCancelled) {
+          setAssetFound(false);
+          setLoading(false);
+        }
       }
-      setLoading(false);
     }
 
     fetchVideo();
-  }, [url]);
+    return () => {
+      isCancelled = true;
+    };
+  }, [provider, url, validExternalUrl]);
 
   const sources = useMemo<Plyr.Source[]>(() => {
-    if (url.includes('youtube')) {
+    if (provider === 'youtube') {
+      if (!validExternalUrl) return [];
       return [
         {
           src: url,
@@ -70,7 +155,8 @@ export function VideoController({ currentConfig }: { currentConfig: VideoCompone
         },
       ];
     }
-    if (url.includes('vimeo')) {
+    if (provider === 'vimeo') {
+      if (!validExternalUrl) return [];
       return [
         {
           src: url,
@@ -84,7 +170,8 @@ export function VideoController({ currentConfig }: { currentConfig: VideoCompone
         type: 'video/mp4',
       },
     ];
-  }, [url]);
+  }, [provider, url, validExternalUrl]);
+  const playerSource = useMemo<Plyr.SourceInfo>(() => ({ type: 'video', sources }), [sources]);
 
   const options = useMemo<Plyr.Options>(() => ({
     controls: [
@@ -128,23 +215,21 @@ export function VideoController({ currentConfig }: { currentConfig: VideoCompone
     }
   }, [currentComponent, currentConfig.forceCompletion, currentStep, storeDispatch, updateResponseBlockValidation]);
 
-  const errorCallback = useCallback(() => {
-    setAssetFound(false);
-  }, []);
-
   const ref = useRef<APITypes>(null);
 
-  return loading || assetFound
+  return (assetFound && sources.length > 0)
     ? (
-      <Box mb="md">
+      // Box required for proper react node handling in the component tree
+      <Box>
         <CustomPlyrInstance
           ref={ref}
-          source={{ type: 'video', sources }}
+          source={playerSource}
           options={options}
           endedCallback={endedCallback}
-          errorCallback={errorCallback}
         />
       </Box>
     )
-    : <ResourceNotFound path={currentConfig.path} />;
+    : loading
+      ? <LoadingOverlay />
+      : <ResourceNotFound path={currentConfig.path} />;
 }

@@ -1,12 +1,25 @@
 import {
-  Box, Flex, Radio, Text, Checkbox,
+  Box, Radio, Text, Checkbox,
 } from '@mantine/core';
-import { ChangeEvent } from 'react';
-import { MatrixResponse, StringOption } from '../../parser/types';
-import { ReactMarkdownWrapper } from '../ReactMarkdownWrapper';
+import {
+  ChangeEvent, useMemo,
+} from 'react';
+import { MatrixResponse, ParsedStringOption } from '../../parser/types';
 import { useStoreDispatch, useStoreActions } from '../../store/store';
 import checkboxClasses from './css/Checkbox.module.css';
 import radioClasses from './css/Radio.module.css';
+import { useStoredAnswer } from '../../store/hooks/useStoredAnswer';
+import { InputLabel } from './InputLabel';
+import { OptionLabel } from './OptionLabel';
+import { generateErrorMessage } from './utils';
+import { parseStringOptions } from '../../utils/stringOptions';
+
+const CHOICE_STRING_TO_COLUMNS: Record<string, string[]> = {
+  likely5: ['Highly Unlikely', 'Unlikely', 'Neutral', 'Likely', 'Highly Likely'],
+  likely7: ['Highly Unlikely', 'Unlikely', 'Slightly Unlikely', 'Neutral', 'Slightly Likely', 'Likely', 'Highly Likely'],
+  satisfaction5: ['Highly Unsatisfied', 'Unsatisfied', 'Neutral', 'Satisfied', 'Highly Satisfied'],
+  satisfaction7: ['Highly Unsatisfied', 'Unsatisfied', 'Slightly Unsatisfied', 'Neutral', 'Slightly Satisfied', 'Satisfied', 'Highly Satisfied'],
+};
 
 function CheckboxComponent({
   _choices,
@@ -17,12 +30,12 @@ function CheckboxComponent({
   onChange,
   disabled,
 }: {
-  _choices: StringOption[],
+  _choices: ParsedStringOption[],
   _n: number,
   idx: number,
-  question: StringOption,
+  question: string,
   answer: { value: Record<string, string> },
-  onChange: (event: ChangeEvent<HTMLInputElement>, questionKey: string, option: StringOption) => void
+  onChange: (event: ChangeEvent<HTMLInputElement>, questionKey: string, option: ParsedStringOption) => void
   disabled: boolean
 }) {
   return (
@@ -34,12 +47,12 @@ function CheckboxComponent({
         justifyItems: 'center',
       }}
     >
-      {_choices.map((checkbox: StringOption) => (
+      {_choices.map((checkbox: ParsedStringOption) => (
         <Checkbox
           disabled={disabled}
           key={`${checkbox.label}-${idx}`}
-          checked={answer.value[question.label].split('|').includes(checkbox.value)}
-          onChange={(event) => onChange(event, question.label, checkbox)}
+          checked={(answer.value[question] || '').split('|').includes(checkbox.value)}
+          onChange={(event) => onChange(event, question, checkbox)}
           value={checkbox.value}
           classNames={{ input: checkboxClasses.fixDisabled, icon: checkboxClasses.fixDisabledIcon }}
         />
@@ -57,15 +70,14 @@ function RadioGroupComponent({
   onChange,
   disabled,
 }: {
-  _choices: StringOption[],
+  _choices: ParsedStringOption[],
   _n: number,
   idx: number,
-  question: StringOption,
+  question: string,
   response: MatrixResponse,
   answer: { value: Record<string, string> },
   onChange: (val: string, questionKey: string) => void,
   disabled: boolean
-
 }) {
   return (
     <Radio.Group
@@ -75,8 +87,8 @@ function RadioGroupComponent({
         '--input-description-size': 'calc(var(--mantine-font-size-md) - calc(0.125rem * var(--mantine-scale)))',
         flex: 1,
       }}
-      onChange={(val) => onChange(val, question.label)}
-      value={answer.value[question.label]}
+      onChange={(val) => onChange(val, question)}
+      value={answer.value[question]}
     >
       <div
         style={{
@@ -86,7 +98,7 @@ function RadioGroupComponent({
           justifyItems: 'center',
         }}
       >
-        {_choices.map((radio: StringOption) => (
+        {_choices.map((radio: ParsedStringOption) => (
           <Radio
             disabled={disabled}
             value={radio.value}
@@ -117,21 +129,30 @@ export function MatrixInput({
 
   const {
     answerOptions,
-    questionOptions,
     prompt,
     secondaryText,
     required,
+    infoText,
   } = response;
 
-  const _choiceStringToColumns: Record<string, string[]> = {
-    likely5: ['Highly Unlikely', 'Unlikely', 'Neutral', 'Likely', 'Highly Likely'],
-    likely7: ['Highly Unlikely', 'Unlikely', 'Slightly Unlikely', 'Neutral', 'Slightly Likely', 'Likely', 'Highly Likely'],
-    satisfaction5: ['Highly Unsatisfied', 'Unsatisfied', 'Neutral', 'Satisfied', 'Highly Satisfied'],
-    satisfaction7: ['Highly Unsatisfied', 'Unsatisfied', 'Slightly Unsatisfied', 'Neutral', 'Slightly Satisfied', 'Satisfied', 'Highly Satisfied'],
-  };
+  const _choices = useMemo<ParsedStringOption[]>(
+    () => (typeof answerOptions === 'string'
+      ? parseStringOptions(CHOICE_STRING_TO_COLUMNS[answerOptions])
+      : parseStringOptions(answerOptions)),
+    [answerOptions],
+  );
 
-  const _choices = typeof answerOptions === 'string' ? _choiceStringToColumns[answerOptions].map((entry) => ({ value: entry, label: entry })) : answerOptions.map((option) => (typeof option === 'string' ? { value: option, label: option } : option));
-  const _questions = questionOptions.map((option) => (typeof option === 'string' ? { value: option, label: option } : option));
+  const questions = useMemo(
+    () => parseStringOptions(response.questionOptions),
+    [response.questionOptions],
+  );
+  const questionsByValue = useMemo(
+    () => Object.fromEntries(questions.map((question) => [question.value, question])),
+    [questions],
+  );
+
+  const { questionOrders } = useStoredAnswer();
+  const orderedQuestions = useMemo(() => questionOrders[response.id] || questions.map((question) => question.value), [questionOrders, questions, response.id]);
 
   // Re-define on change functions. Dispatch answers to store.
   const onChangeRadio = (val: string, questionKey: string) => {
@@ -144,7 +165,7 @@ export function MatrixInput({
     storeDispatch(setMatrixAnswersRadio(payload));
   };
 
-  const onChangeCheckbox = (event: ChangeEvent<HTMLInputElement>, questionKey: string, option: StringOption) => {
+  const onChangeCheckbox = (event: ChangeEvent<HTMLInputElement>, questionKey: string, option: ParsedStringOption) => {
     const isChecked = event.target.checked;
     const payload = {
       questionKey,
@@ -157,16 +178,13 @@ export function MatrixInput({
     storeDispatch(setMatrixAnswersCheckbox(payload));
   };
 
+  const error = generateErrorMessage(response, answer);
+
   const _n = _choices.length;
-  const _m = _questions.length;
+  const _m = orderedQuestions.length;
   return (
     <>
-      <Flex direction="row" wrap="nowrap" gap={4}>
-        {enumerateQuestions && <Box style={{ minWidth: 'fit-content', fontSize: 16, fontWeight: 500 }}>{`${index}. `}</Box>}
-        <Box style={{ display: 'block' }} className="no-last-child-bottom-padding">
-          <ReactMarkdownWrapper text={prompt} required={required} />
-        </Box>
-      </Flex>
+      {prompt.length > 0 && <InputLabel prompt={prompt} required={required} index={index} enumerateQuestions={enumerateQuestions} infoText={infoText} />}
       <Text c="dimmed" size="sm" mt={0}>{secondaryText}</Text>
       <Box
         style={{
@@ -197,10 +215,9 @@ export function MatrixInput({
           }}
         >
           {_choices.map((entry, idx) => (
-            <Text
+            <Box
               key={`choice-${idx}-label`}
               style={{
-                fontWeight: 'bold',
                 textAlign: 'center',
                 fontSize: '0.8em',
               }}
@@ -208,8 +225,8 @@ export function MatrixInput({
               ml="xs"
               mr="xs"
             >
-              {entry.label}
-            </Text>
+              <OptionLabel label={entry.label} infoText={entry.infoText} />
+            </Box>
           ))}
         </div>
         {/* Row Headers */}
@@ -220,8 +237,8 @@ export function MatrixInput({
             gridTemplateRows: `repeat(${_m}, 1fr)`,
           }}
         >
-          {_questions.map((entry, idx) => (
-            <Text
+          {orderedQuestions.map((questionKey, idx) => (
+            <Box
               key={`question-${idx}-label`}
               style={{
                 height: '80px',
@@ -238,8 +255,8 @@ export function MatrixInput({
               miw={140}
               maw={400}
             >
-              {entry.label}
-            </Text>
+              <OptionLabel label={(questionsByValue[questionKey]?.label || questionKey)} infoText={questionsByValue[questionKey]?.infoText} />
+            </Box>
           ))}
         </div>
         {/* Rest */}
@@ -250,7 +267,7 @@ export function MatrixInput({
             gridTemplateRows: `repeat(${_m},1fr)`,
           }}
         >
-          {_questions.map((question, idx) => (
+          {orderedQuestions.map((questionKey, idx) => (
             <div
               key={`question-${idx}`}
               style={{
@@ -265,7 +282,7 @@ export function MatrixInput({
                   <RadioGroupComponent
                     disabled={disabled}
                     idx={idx}
-                    question={question}
+                    question={questionKey}
                     answer={answer}
                     _choices={_choices}
                     _n={_n}
@@ -277,7 +294,7 @@ export function MatrixInput({
                   <CheckboxComponent
                     disabled={disabled}
                     idx={idx}
-                    question={question}
+                    question={questionKey}
                     answer={answer}
                     _choices={_choices}
                     _n={_n}
@@ -288,6 +305,11 @@ export function MatrixInput({
           ))}
         </div>
       </Box>
+      {error && (
+        <Text c={required ? 'red' : 'orange'} size="sm" mt="xs">
+          {error}
+        </Text>
+      )}
     </>
   );
 }

@@ -26,7 +26,7 @@
     "components": {
     "magic": {
         "type": "website",
-        "path": "https://beta.metrosets.algo.cit.tum.de//app.html?dataset=magic_exploration.json",
+        "path": "https://localhost:8080/app.html?dataset=magic_exploration.json",
         "response": [
         ]
         },

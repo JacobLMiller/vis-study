@@ -18,7 +18,7 @@
     "logoPath": "revisitAssets/revisitLogoSquare.svg",
     "withProgressBar": true,
     "autoDownloadStudy": false,
-    "sidebar": true
+    "withSidebar": true
   },
   "baseComponents": {     
     "tsne": {

@@ -18,16 +18,20 @@ This page explains how to interact with the visualization before you begin the s
 
 ### Selecting Super-Points
 - Click and drag to draw a **rectangular selection box**.
-- All super-points inside the rectangle will be selected.
+- All super-points inside the rectangle will be selected and highlighted.
+- You can move or resize the box by dragging it or its edges.
+- To remove the selection, click **Clear selection** or click once on an empty spot in the visualization.
 
 ### Drilling Down
-- After selecting one or more super-points, you can **drill down** to a lower level.
+- After selecting one or more super-points, click **Drill down** to move to a lower level.
 - Drilling down reveals a **more detailed view** of the selected groups.
-- You may drill down multiple times.
+- There are **3 levels**. The current level is shown above the buttons. On the most detailed level, the button reads **Finest level reached**.
+- Drilling down can take a few seconds, especially with large selections. A loading indicator is shown in the meantime.
+- Very small selections cannot be drilled into; select a few more points in that case.
 
 ### Going Back Up
-- You can return to a **higher (more abstract) level** of the hierarchy at any time.
-- Going back up restores a broader overview of the data.
+- Click **Go back** to return to the previous, more abstract level.
+- Click **Restore original view** to jump straight back to the top level.
 
 ---
 
@@ -35,8 +39,8 @@ This page explains how to interact with the visualization before you begin the s
 
 The image below shows an example of selecting super-points and drilling down to a lower level.
 
-<!-- ![Example of hierarchical SNE interaction showing selected super-points and a more detailed view after drilling down](assets/img/hsne.png) -->
-<img src="assets/img/hsne.png" width="400px">
+
+<img src="tsne/assets/img/hsne.png" width="400px">
 
 *(This screenshot is for illustration only. Visual appearance may differ slightly in the study.)*
 
@@ -47,9 +51,9 @@ The image below shows an example of selecting super-points and drilling down to 
 Before starting the real tasks, you will see a **practice dataset**.
 
 Use this example to:
-- Try selecting super-points with the rectangular brush
+- Try selecting super-points with the rectangular brush, and clearing the selection
 - Drill down to explore more detailed levels
-- Go back up to higher levels
+- Go back up to higher levels, or restore the original view
 
 You may interact freely during the practice example.  
 **Your answers in the practice example will not be recorded and do not count toward the study.**

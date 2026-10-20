@@ -142,8 +142,10 @@ function polarToLobachevsky(pt){
 //---------------------------------------------------------------------------------------
 
 class HyperbolicVis {
-    #nodeRadiusLarge = 0.02;
-    #nodeRadiusSmall = 0.02;
+    // Smaller points so dense clusters stay separable; the target shape is drawn larger
+    #nodeRadiusLarge = 0.015;
+    #nodeRadiusSmall = 0.015;
+    #specialShapeScale = 3.4;
     #stepSize = 10;
 
     #colors = ["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"];
@@ -326,14 +328,20 @@ class HyperbolicVis {
 
                 
             const center = n.hcircle.getEuclideanCenter();
-            console.log(n.hcircle.getEuclideanRadius())
             let [x,y] = this.hcanvas.getCanvasPixelCoords(center);
-            this.shape(
-                ctx,
-                x,
-                y,
-                2.7 * n.hcircle.getEuclideanRadius() * this.hcanvas.getRadius()
-            );
+            const size = this.#specialShapeScale * n.hcircle.getEuclideanRadius() * this.hcanvas.getRadius();
+
+            // White halo first, so the shape stands out from the points underneath
+            ctx.save();
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 4;
+            ctx.lineJoin = "round";
+            this.shape(ctx, x, y, size);
+            ctx.restore();
+
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 1;
+            this.shape(ctx, x, y, size);
         })
 
         ctx.lineWidth = 3;
@@ -543,11 +551,11 @@ class HyperbolicVis {
 
     }
 
-    addResetButton(){
+    addResetButton(containerId = "visualization-container"){
         var resetButton = document.createElement("button")
         resetButton.classList.add("reset-button")
-        document.getElementById("navbarToggler").appendChild(resetButton)
-        resetButton.appendChild(document.createTextNode('Reset Visualization'));
+        document.getElementById(containerId).appendChild(resetButton)
+        resetButton.appendChild(document.createTextNode('Restore original view'));
         resetButton.onclick = () => {
             this.resetToDefault();
         }            
@@ -562,7 +570,7 @@ class HyperbolicVis {
         this.addPan();
         this.addDblClick();
         this.addZoom();
-        // this.addResetButton();
+        this.addResetButton();
         if(this.center_node !== null){
             this.setToCenterNode();
         }

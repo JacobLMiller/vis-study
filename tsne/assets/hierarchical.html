@@ -5,23 +5,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>t-SNE</title>
   <style>
+    html, body {
+      margin: 0;
+      overflow: hidden;
+    }
+
+    /* Leave room below the view so the study iframe fits on short screens */
     .container {
       display: flex;
-      height: 100vh;
+      height: calc(100vh - 40px);
       overflow: hidden;
     }
 
     .sidebar {
-      width: 100px;
+      width: 140px;
       background-color: #f0f0f0;
-      padding: 2px;
+      padding: 4px;
       box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .hsne-button {
+      width: 100%;
+      font-size: 13px;
+    }
+
+    .hsne-button:disabled {
+      cursor: not-allowed;
+    }
+
+    #levellabel {
+      font-size: 13px;
+      font-weight: bold;
     }
 
     .main {
       flex: 1;
       max-width: 1000px;
       background-color: #ffffff;
+      position: relative;
+    }
+
+    /* Overlay shown while a drill-down request is running */
+    #loading {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.7);
+      z-index: 10;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 15px;
+    }
+
+    #loading.display {
+      display: flex;
+    }
+
+    #loading .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #ccc;
+      border-top-color: #1f77b4;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     svg {
@@ -40,11 +95,14 @@
 <body>
  <div class="container">
     <div class="sidebar" id="sidebar">
+    <div id="levellabel"></div>
     <div id="drillcontainer"></div>
-    <div id="popstack" style="display:none;"></div>        
+    <div id="popstack" style="display:none;"></div>
+    <div id="clearcontainer"></div>
+    <div id="resetcontainer"></div>
     </div>
     <div class="main">
-      <div id="loading"></div>
+      <div id="loading"><div class="spinner"></div><div>Loading more detail…</div></div>
       <svg id="scatterplot" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
   </div>
@@ -59,7 +117,11 @@
           Scatter.addData(jsdata.nodes,null,jsdata.fname);
           Scatter.process();
           Scatter.draw();
-          Scatter.interact();        
+          Scatter.interact();
+          // Optional: start below the top level (set via "startLevel" in the component parameters)
+          if (parameters.startLevel) {
+              Scatter.startAtLevel(Number(parameters.startLevel));
+          }
       })
 
       // d3.json("data/blobs.json").then( data => {

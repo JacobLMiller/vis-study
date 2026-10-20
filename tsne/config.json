@@ -14,7 +14,7 @@
   },
   "uiConfig": {
     "contactEmail": "jacob.miller@tum.de",
-    "helpTextPath": "tutorial/assets/help.md",
+    "helpTextPath": "tsne/assets/help.md",
     "logoPath": "revisitAssets/revisitLogoSquare.svg",
     "withProgressBar": true,
     "autoDownloadStudy": false,
@@ -30,7 +30,7 @@
                     "required": true, 
                     "location": "sidebar",
                     "type": "radio",
-                    "options": ["2", "3", "4", "5", "I am unable to work this out"]
+                    "options": ["1", "2", "3", "4", "5", "More than 5", "No clear cluster structure", "I am unable to work this out"]
                 }
             ], 
             "path": "tsne/assets/flat.html", 
@@ -41,7 +41,7 @@
             "response": [
                 {
                     "id": "answer", 
-                    "prompt": "Select one of the following:",
+                    "prompt": "What is the shape of the points that are not circles?",
                     "required": true, 
                     "location": "sidebar",
                     "type": "radio",
@@ -60,7 +60,7 @@
                     "required": true, 
                     "location": "sidebar",
                     "type": "radio",
-                    "options": ["2", "3", "4", "5", "I am unable to work this out"]
+                    "options": ["1", "2", "3", "4", "5", "More than 5", "No clear cluster structure", "I am unable to work this out"]
                 }
             ], 
             "path": "tsne/assets/hierarchical.html", 
@@ -71,7 +71,7 @@
                 "response": [
                     {
                         "id": "answer", 
-                        "prompt": "Select one of the following:",
+                        "prompt": "What is the shape of the points that are not circles?",
                         "required": true, 
                         "location": "sidebar",
                         "type": "radio",
@@ -90,7 +90,7 @@
                     "required": true, 
                     "location": "sidebar",
                     "type": "radio",
-                    "options": ["2", "3", "4", "5", "I am unable to work this out"]
+                    "options": ["1", "2", "3", "4", "5", "More than 5", "No clear cluster structure", "I am unable to work this out"]
                 }
             ], 
             "path": "tsne/assets/hyperbolic.html", 
@@ -101,7 +101,7 @@
                 "response": [
                     {
                         "id": "answer", 
-                        "prompt": "Select one of the following:",
+                        "prompt": "What is the shape of the points that are not circles?",
                         "required": true, 
                         "location": "sidebar",
                         "type": "radio",
@@ -240,58 +240,82 @@
     "response": [
     {
         "id": "ueqs_1",
-        "prompt": "The visualization felt obstructive ⟷ supportive",
+        "prompt": "The visualization felt obstructive (1) ⟷ supportive (7)",
         "required": true,
         "type": "radio",
+        "horizontal": true,
+        "leftLabel": "obstructive",
+        "rightLabel": "supportive",
         "options": ["1", "2", "3", "4", "5", "6", "7"]
     },
     {
         "id": "ueqs_2",
-        "prompt": "The visualization felt complicated ⟷ easy to use",
+        "prompt": "The visualization felt complicated (1) ⟷ easy to use (7)",
         "required": true,
         "type": "radio",
+        "horizontal": true,
+        "leftLabel": "complicated",
+        "rightLabel": "easy to use",
         "options": ["1", "2", "3", "4", "5", "6", "7"]
     },
     {
         "id": "ueqs_3",
-        "prompt": "The visualization felt inefficient ⟷ efficient",
+        "prompt": "The visualization felt inefficient (1) ⟷ efficient (7)",
         "required": true,
         "type": "radio",
+        "horizontal": true,
+        "leftLabel": "inefficient",
+        "rightLabel": "efficient",
         "options": ["1", "2", "3", "4", "5", "6", "7"]
     },
     {
         "id": "ueqs_4",
-        "prompt": "The visualization felt confusing ⟷ clear",
+        "prompt": "The visualization felt confusing (1) ⟷ clear (7)",
         "required": true,
         "type": "radio",
+        "horizontal": true,
+        "leftLabel": "confusing",
+        "rightLabel": "clear",
         "options": ["1", "2", "3", "4", "5", "6", "7"]
     },
     {
         "id": "ueqs_5",
-        "prompt": "Using the visualization felt boring ⟷ exciting",
+        "prompt": "Using the visualization felt boring (1) ⟷ exciting (7)",
         "required": true,
         "type": "radio",
+        "horizontal": true,
+        "leftLabel": "boring",
+        "rightLabel": "exciting",
         "options": ["1", "2", "3", "4", "5", "6", "7"]
     },
     {
         "id": "ueqs_6",
-        "prompt": "Using the visualization felt not interesting ⟷ interesting",
+        "prompt": "Using the visualization felt not interesting (1) ⟷ interesting (7)",
         "required": true,
         "type": "radio",
+        "horizontal": true,
+        "leftLabel": "not interesting",
+        "rightLabel": "interesting",
         "options": ["1", "2", "3", "4", "5", "6", "7"]
     },
     {
         "id": "ueqs_7",
-        "prompt": "The visualization felt conventional ⟷ inventive",
+        "prompt": "The visualization felt conventional (1) ⟷ inventive (7)",
         "required": true,
         "type": "radio",
+        "horizontal": true,
+        "leftLabel": "conventional",
+        "rightLabel": "inventive",
         "options": ["1", "2", "3", "4", "5", "6", "7"]
     },
     {
         "id": "ueqs_8",
-        "prompt": "The visualization felt usual ⟷ cutting-edge",
+        "prompt": "The visualization felt usual (1) ⟷ cutting-edge (7)",
         "required": true,
         "type": "radio",
+        "horizontal": true,
+        "leftLabel": "usual",
+        "rightLabel": "cutting-edge",
         "options": ["1", "2", "3", "4", "5", "6", "7"]
     }
     ]
@@ -313,17 +337,21 @@
         "response": []
     },    
     "ueq-hsne": {
-        "baseComponent": "mini-ueq"
-    }, 
+        "baseComponent": "mini-ueq",
+        "path": "tsne/assets/ueq-hsne.md"
+    },
     "ueq-hyperbolic":
     {
-        "baseComponent": "mini-ueq"
+        "baseComponent": "mini-ueq",
+        "path": "tsne/assets/ueq-hyperbolic.md"
     },
 
     "practice_hsne": {
-        "baseComponent": "hsne",
+        "type": "website",
+        "path": "tsne/assets/hierarchical.html",
+        "instructionLocation": "sidebar",
         "description": "Practice: Hierarchical SNE",
-        "instruction": "Practice interacting with the visualization. No answers are recorded.",
+        "instruction": "Practice interacting with the visualization, using the controls described on the previous page. No answers are recorded.",
         "parameters": {
             "dataset": "blobs",
             "qtype": "practice"
@@ -340,9 +368,11 @@
         ]
     },
     "practice_hyperbolic": {
-        "baseComponent": "hyperbolic",
+        "type": "website",
+        "path": "tsne/assets/hyperbolic.html",
+        "instructionLocation": "sidebar",
         "description": "Practice: Hyperbolic t-SNE",
-        "instruction": "Practice interacting with the visualization. No answers are recorded.",
+        "instruction": "Practice interacting with the visualization, using the controls described on the previous page. No answers are recorded.",
         "parameters": {
             "dataset": "blobs",
             "qtype": "practice"
@@ -388,7 +418,7 @@
         "baseComponent": "hsne-description",
         "description": "Hierarchical SNE",
         "instruction": "Describe the structure you observe.",
-        "parameters": { "dataset": "myeloid", "qtype": "description" }
+        "parameters": { "dataset": "myeloid", "qtype": "description", "startLevel": 2 }
     },
 
     "blobs-hyperbolic-description": {
@@ -505,7 +535,8 @@
         "description": "Hierarchical SNE",
         "instruction": "How many clusters do you observe in the given data?",
         "parameters": {
-            "dataset": "myeloid"
+            "dataset": "myeloid",
+            "startLevel": 2
         }
     },
     "blobs-hyperbolic":{
@@ -556,7 +587,7 @@
   "blobs-tsne-point": {
     "baseComponent": "tsne-point",
     "description": "t-SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "blobs",
       "qtype": "point",
@@ -567,7 +598,7 @@
   "planaria-tsne-point": {
     "baseComponent": "tsne",
     "description": "t-SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "planaria",
       "qtype": "point",
@@ -578,7 +609,7 @@
   "coil20-tsne-point": {
     "baseComponent": "tsne",
     "description": "t-SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "coil20",
       "qtype": "point",
@@ -589,7 +620,7 @@
   "fashion-tsne-point": {
     "baseComponent": "tsne",
     "description": "t-SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "fashion_mnist",
       "qtype": "point",
@@ -600,7 +631,7 @@
   "myeloid-tsne-point": {
     "baseComponent": "tsne",
     "description": "t-SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "myeloid",
       "qtype": "point",
@@ -612,7 +643,7 @@
   "blobs-hsne-point": {
     "baseComponent": "hsne-point",
     "description": "Hierarchical SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "blobs",
       "qtype": "point",
@@ -624,7 +655,7 @@
   "blobs-hyperbolic-point": {
     "baseComponent": "hyperbolic-point",
     "description": "Hyperbolic t-SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "blobs",
       "qtype": "point",
@@ -635,7 +666,7 @@
   "planaria-hyperbolic-point": {
     "baseComponent": "hyperbolic-point",
     "description": "Hyperbolic t-SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "planaria",
       "qtype": "point",
@@ -646,7 +677,7 @@
   "coil20-hyperbolic-point": {
     "baseComponent": "hyperbolic-point",
     "description": "Hyperbolic t-SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "coil20",
       "qtype": "point",
@@ -657,7 +688,7 @@
   "fashion-hyperbolic-point": {
     "baseComponent": "hyperbolic-point",
     "description": "Hyperbolic t-SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "fashion_mnist",
       "qtype": "point",
@@ -668,7 +699,7 @@
   "myeloid-hyperbolic-point": {
     "baseComponent": "hyperbolic-point",
     "description": "Hyperbolic t-SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "myeloid",
       "qtype": "point",
@@ -680,7 +711,7 @@
   "cnae9-hsne-point": {
     "baseComponent": "hsne-point",
     "description": "Hierarchical SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "cnae9",
       "qtype": "point",
@@ -691,7 +722,7 @@
   "coil20-hsne-point": {
     "baseComponent": "hsne-point",
     "description": "Hierarchical SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "coil20",
       "qtype": "point",
@@ -702,7 +733,7 @@
   "fashion-hsne-point": {
     "baseComponent": "hsne-point",
     "description": "Hierarchical SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "fashion_mnist",
       "qtype": "point",
@@ -713,7 +744,7 @@
   "har-hsne-point": {
     "baseComponent": "hsne-point",
     "description": "Hierarchical SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "har",
       "qtype": "point",
@@ -724,9 +755,10 @@
   "myeloid-hsne-point": {
     "baseComponent": "hsne-point",
     "description": "Hierarchical SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "myeloid",
+      "startLevel": 2,
       "qtype": "point",
       "id": [348, 284, 159, 220, 344],
       "correct": 3
@@ -735,7 +767,7 @@
   "planaria-hsne-point": {
     "baseComponent": "hsne-point",
     "description": "Hierarchical SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "planaria",
       "qtype": "point",
@@ -747,7 +779,7 @@
   "cnae9-hyperbolic-point": {
     "baseComponent": "hyperbolic-point",
     "description": "Hyperbolic t-SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "cnae9",
       "qtype": "point",
@@ -758,7 +790,7 @@
   "har-hyperbolic-point": {
     "baseComponent": "hyperbolic-point",
     "description": "Hyperbolic t-SNE",
-    "instruction": "What is the shape of the non-circle point?",
+    "instruction": "Most of the points are drawn as circles, but some are drawn differently. Find them and answer: What is their shape?",
     "parameters": {
       "dataset": "har",
       "qtype": "point",
@@ -778,7 +810,7 @@
                 "prompt": "How many clusters do you observe in the given data?",
                 "required": true, 
                 "type": "radio",
-                "options": ["2", "3", "4", "5", "I am unable to work this out"]
+                "options": ["1", "2", "3", "4", "5", "More than 5", "No clear cluster structure", "I am unable to work this out"]
             }
         ]
     }

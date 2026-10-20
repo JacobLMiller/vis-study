@@ -39,6 +39,34 @@
     stroke: rgb(77, 77, 77);
     stroke-width: 3;
 }
+
+/* Fit the view inside the study iframe so no scrollbar appears on short screens */
+html, body {
+    height: auto;
+    overflow: hidden;
+}
+
+#main {
+    height: auto;
+}
+
+#visualization-container {
+    position: relative;
+    height: calc(100vh - 40px);
+}
+
+div#hyperbolic-canvas {
+    height: 100%;
+}
+
+.reset-button {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 5;
+    font-size: 13px;
+    padding: 4px 10px;
+}
   </style>
 
   <!-- <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}"> -->
@@ -59,12 +87,9 @@
 
   <div class="container-fluid" id="main-body">
     <div class="row" id="main">
-         <div class="col-9" id="visualization-container"></div>   
-         <div class="col-9" id="sidebar2">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler"
-        aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
-         </div>   
+         <div class="col-9" id="visualization-container"></div>
     </div>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -138,8 +163,7 @@
 
 
             let svg = d3.select("#visualization-container").append("div")
-                    .attr("id", "hyperbolic-canvas")
-                    .style("height", `${800}px`);
+                    .attr("id", "hyperbolic-canvas");
             let vis = new HyperbolicVis("#hyperbolic-canvas", data, null, null,parameters);  
             vis.addData(data,null,"blobs");
             vis.process();
